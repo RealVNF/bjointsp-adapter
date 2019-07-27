@@ -1,0 +1,87 @@
+name: sfc_1
+vlinks:
+- dest: a
+  dest_input: 0
+  direction: forward
+  max_delay: 1000
+  src: vnf_source
+  src_output: 0
+- dest: b
+  dest_input: 0
+  direction: forward
+  max_delay: 1000
+  src: a
+  src_output: 0
+- dest: c
+  dest_input: 0
+  direction: forward
+  max_delay: 1000
+  src: b
+  src_output: 0
+vnfs:
+- cpu:
+  - 0
+  inputs_bwd: 0
+  inputs_fwd: 0
+  mem:
+  - 0
+  name: vnf_source
+  out_bwd: []
+  out_fwd: []
+  outputs_bwd: 0
+  outputs_fwd: 1
+  stateful: true
+  type: source
+  vnf_delay: 0
+- cpu:
+  - 1
+  - 0
+  inputs_bwd: 0
+  inputs_fwd: 1
+  mem:
+  - 0
+  - 0
+  name: a
+  out_bwd: []
+  out_fwd:
+  - - 1
+    - 0
+  outputs_bwd: 0
+  outputs_fwd: 1
+  stateful: false
+  type: normal
+  vnf_delay: 5.0
+- cpu:
+  - 1
+  - 0
+  inputs_bwd: 0
+  inputs_fwd: 1
+  mem:
+  - 0
+  - 0
+  name: b
+  out_bwd: []
+  out_fwd:
+  - - 1
+    - 0
+  outputs_bwd: 0
+  outputs_fwd: 1
+  stateful: false
+  type: normal
+  vnf_delay: 5.0
+- cpu:
+  - 1
+  - 0
+  inputs_bwd: 0
+  inputs_fwd: 1
+  mem:
+  - 0
+  - 0
+  name: c
+  out_bwd: []
+  out_fwd: []
+  outputs_bwd: 0
+  outputs_fwd: 0
+  stateful: false
+  type: normal
+  vnf_delay: 5.0

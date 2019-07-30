@@ -5,7 +5,5 @@
     id: f2
   - data_rate: 1.0
     id: f3
-  - data_rate: 1.0
-    id: f4
-  node: pop2
+  node: pop0
   vnf: vnf_source

@@ -1,9 +1,42 @@
-import yaml
 from collections import defaultdict
+
+import yaml
 from common.common_functionalities import normalize_scheduling_probabilities
 
 
 def get_placement_and_schedule(results_file_loc, nodes_list, sfc_name, sf_list):
+    """
+    Reads the results file created by the BJointSP to create the placement and schedule for the simulator
+
+    Parameters:
+        results_file_loc: Results file from BJointSP
+        nodes_list
+        sfc_name
+        sf_list
+    Returns:
+         placement
+         schedule
+
+    placement is a Dictionary with:
+            key = nodes of the network
+            value = list of all the SFs in the network
+
+    schedule is of the following form:
+            schedule : dict
+                {
+                    'node id' : dict
+                    {
+                        'SFC id' : dict
+                        {
+                            'SF id' : dict
+                            {
+                                'node id' : float (Inclusive of zero values)
+                            }
+                        }
+                    }
+                }
+
+    """
     placement = defaultdict(list)
 
     # creating the placement for the simulator from the results of BJointSP
@@ -17,8 +50,13 @@ def get_placement_and_schedule(results_file_loc, nodes_list, sfc_name, sf_list):
         placement[vnf['node']].append(vnf['name'])
 
     # creating the schedule for the simulator from the results of BJointSP
-    # we use the flows from the results
+    # we use the flows from the results file
 
+    # 'flows' keeps track of the number of flows forwarded by BJointSP from a source_node to a dest_node with
+    # dest_vnf(or requested vnf) lying in the dest_node.
+    # The schedule is finally created for each vnf in the vnf_list from each node of the network to all the nodes
+    # We use the probabilities normalization function 'normalize_scheduling_probabilities' such that for each SF,*
+    # *the sum of Probabilities is 1
     flows = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
 
     for flow in results['placement']['flows']:

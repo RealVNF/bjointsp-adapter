@@ -1,27 +1,5 @@
 - flows:
-  - data_rate: 1
+  - data_rate: 1.0
     id: f1
-  - data_rate: 3
-    id: f2
-  - data_rate: 10
-    id: f3
   node: pop0
-  vnf: vnf_source
-- flows:
-  - data_rate: 1
-    id: f2
-  - data_rate: 3
-    id: f3
-  - data_rate: 10
-    id: f4
-  node: pop1
-  vnf: vnf_source
-- flows:
-  - data_rate: 1
-    id: f3
-  - data_rate: 3
-    id: f4
-  - data_rate: 10
-    id: f5
-  node: pop2
   vnf: vnf_source

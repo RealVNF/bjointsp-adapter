@@ -2,7 +2,6 @@ import os
 
 from setuptools import setup, find_packages
 
-# Not recommended but for now only solution since repo is private
 os.system('pip install git+https://github.com/RealVNF/coord-env-interface.git')
 os.system('pip install git+https://github.com/RealVNF/coordination-simulation.git')
 os.system('pip install git+https://github.com/CN-UPB/B-JointSP.git')

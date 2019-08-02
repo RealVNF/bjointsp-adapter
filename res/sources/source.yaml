@@ -1,9 +1,1 @@
-- flows:
-  - data_rate: 1.0
-    id: f1
-  - data_rate: 1.0
-    id: f2
-  - data_rate: 1.0
-    id: f3
-  node: pop0
-  vnf: vnf_source
+[]

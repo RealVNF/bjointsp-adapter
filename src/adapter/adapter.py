@@ -3,6 +3,7 @@ import logging
 import os
 
 import yaml
+from datetime import datetime
 from bjointsp.main import place as bjointsp_place
 from siminterface.simulator import Simulator
 from spinterface.spinterface import SimulatorAction
@@ -47,11 +48,14 @@ def parse_args():
 
 def main():
     args = parse_args()
-    logging.basicConfig(level=logging.INFO)
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    os.makedirs("logs", exist_ok=True)
+    logging.basicConfig(filename="logs/{}_{}_{}.log".format(os.path.basename(args.network),
+                                                            timestamp, args.seed), level=logging.INFO)
     logging.getLogger("coordsim").setLevel(logging.WARNING)
-    logging.getLogger("bjointsp").setLevel(logging.WARNING)
+    logging.getLogger("bjointsp").setLevel(logging.INFO)
     # creating the simulator
-    simulator = Simulator()
+    simulator = Simulator(test_mode=True)
     # initializing the simulator with absolute paths to the network, service_functions and the config. files.
     init_state = simulator.init(os.path.abspath(args.network),
                                 os.path.abspath(args.service_functions),
@@ -86,8 +90,7 @@ def main():
     first_result = bjointsp_place(os.path.abspath(args.network),
                                   os.path.abspath(template),
                                   os.path.abspath(BJOINTSP_FIRST_SRC_LOCATION), cpu=node_cap, mem=node_cap, dr=1000)
-    # BJointSP throws an error right now when a prev_embedding is provided.
-    # prev_embedding = first_result
+    prev_embedding = first_result
 
     # creating the schedule and placement for the simulator from the first result file that BJointSP returns.
     placement, schedule = get_placement_and_schedule(os.path.abspath(first_result), nodes_list, sfc_name, sf_list)
@@ -103,8 +106,8 @@ def main():
         source, source_exists = create_source_file(apply_state.traffic, sf_list, sfc_name, flow_dr_mean)
         if source_exists:
             result = bjointsp_place(os.path.abspath(args.network), os.path.abspath(template), os.path.abspath(source),
-                                    cpu=node_cap, mem=node_cap, dr=1000)
-            # prev_embedding = result
+                                    prev_embedding_file=prev_embedding, cpu=node_cap, mem=node_cap, dr=1000)
+            prev_embedding = result
             placement, schedule = get_placement_and_schedule(os.path.abspath(result), nodes_list, sfc_name, sf_list)
 
 

@@ -46,8 +46,11 @@ def get_placement_and_schedule(results_file_loc, nodes_list, sfc_name, sf_list):
     for node in nodes_list:
         placement[node] = []
 
+    # The simulator does not need the 'vnf_source', we just need it for the BJointSP.
+    # In the 'apply' fx. of the simulator 'vnf_source' causes an error as it cannot find it from the network file.
     for vnf in results['placement']['vnfs']:
-        placement[vnf['node']].append(vnf['name'])
+        if vnf['name'] != 'vnf_source':
+            placement[vnf['node']].append(vnf['name'])
 
     # creating the schedule for the simulator from the results of BJointSP
     # we use the flows from the results file

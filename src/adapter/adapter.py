@@ -55,11 +55,11 @@ def main():
     logging.getLogger("coordsim").setLevel(logging.WARNING)
     logging.getLogger("bjointsp").setLevel(logging.INFO)
     # creating the simulator
-    simulator = Simulator(test_mode=True)
+    simulator = Simulator(os.path.abspath(args.network),
+                          os.path.abspath(args.service_functions),
+                          os.path.abspath(args.config), test_mode=True)
     # initializing the simulator with absolute paths to the network, service_functions and the config. files.
-    init_state = simulator.init(os.path.abspath(args.network),
-                                os.path.abspath(args.service_functions),
-                                os.path.abspath(args.config), args.seed)
+    init_state = simulator.init(args.seed)
     log.info("Network Stats after init(): %s", init_state.network_stats)
     # assuming for now that there is only one SFC.
     sfc_name = list(init_state.sfcs.keys())[0]

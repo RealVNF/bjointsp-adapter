@@ -128,5 +128,5 @@ def create_source_file(traffic_info, sf_list, sfc_name, flow_dr_mean):
                     flows.append({"id": "f" + str(i), "data_rate": flow_dr_mean})
                     i += 1
                 source_list.append({'node': node, 'vnf': "vnf_source", 'flows': flows})
-        yaml.safe_dump(source_list, f, default_flow_style=False)
+        yaml.dump(source_list, f, default_flow_style=False)
     return BJOINTSP_SOURCE_LOCATION, source_exists

@@ -55,10 +55,11 @@ def main():
     logging.getLogger("coordsim").setLevel(logging.WARNING)
     logging.getLogger("bjointsp").setLevel(logging.INFO)
     # creating the simulator
+    # initializing the simulator with absolute paths to the network, service_functions and the config. files.
     simulator = Simulator(os.path.abspath(args.network),
                           os.path.abspath(args.service_functions),
                           os.path.abspath(args.config), test_mode=True)
-    # initializing the simulator with absolute paths to the network, service_functions and the config. files.
+
     init_state = simulator.init(args.seed)
     log.info("Network Stats after init(): %s", init_state.network_stats)
     # assuming for now that there is only one SFC.
@@ -89,9 +90,8 @@ def main():
     # Since the simulator right now does not have any link_dr , we are using a high value = 1000 for now.
     first_result = bjointsp_place(os.path.abspath(args.network),
                                   os.path.abspath(template),
-                                  os.path.abspath(BJOINTSP_FIRST_SRC_LOCATION), cpu=node_cap, mem=node_cap, dr=1000)
-    prev_embedding = first_result
-
+                                  os.path.abspath(BJOINTSP_FIRST_SRC_LOCATION), cpu=node_cap, mem=node_cap, dr=1000,
+                                  networkx=simulator.network)
     # creating the schedule and placement for the simulator from the first result file that BJointSP returns.
     placement, schedule = get_placement_and_schedule(os.path.abspath(first_result), nodes_list, sfc_name, sf_list)
 
@@ -106,8 +106,7 @@ def main():
         source, source_exists = create_source_file(apply_state.traffic, sf_list, sfc_name, flow_dr_mean)
         if source_exists:
             result = bjointsp_place(os.path.abspath(args.network), os.path.abspath(template), os.path.abspath(source),
-                                    prev_embedding_file=prev_embedding, cpu=node_cap, mem=node_cap, dr=1000)
-            prev_embedding = result
+                                    cpu=node_cap, mem=node_cap, dr=1000, networkx=simulator.network)
             placement, schedule = get_placement_and_schedule(os.path.abspath(result), nodes_list, sfc_name, sf_list)
 
 

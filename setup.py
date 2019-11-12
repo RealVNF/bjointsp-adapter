@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 os.system('pip install git+https://github.com/RealVNF/coord-env-interface.git')
 os.system('pip install git+https://github.com/RealVNF/coordination-simulation.git')
-os.system('pip install git+https://github.com/CN-UPB/B-JointSP.git@dev')
+os.system('pip install git+https://github.com/CN-UPB/B-JointSP.git')
 requirements = [
     'pyyaml>=5.1',
     'coord-interface',

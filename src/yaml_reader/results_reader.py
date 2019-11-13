@@ -41,7 +41,7 @@ def get_placement_and_schedule(results_file_loc, nodes_list, sfc_name, sf_list):
 
     # creating the placement for the simulator from the results of BJointSP
     with open(results_file_loc) as f:
-        results = yaml.load(f, yaml.SafeLoader)
+        results = yaml.load(f, yaml.Loader)
 
     for node in nodes_list:
         placement[node] = []

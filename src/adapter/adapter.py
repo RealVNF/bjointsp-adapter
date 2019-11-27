@@ -91,9 +91,9 @@ def main():
     first_result = bjointsp_place(os.path.abspath(args.network),
                                   os.path.abspath(template),
                                   os.path.abspath(BJOINTSP_FIRST_SRC_LOCATION), cpu=node_cap, mem=node_cap, dr=1000,
-                                  networkx=simulator.network)
+                                  networkx=simulator.network, write_result=False)
     # creating the schedule and placement for the simulator from the first result file that BJointSP returns.
-    placement, schedule = get_placement_and_schedule(os.path.abspath(first_result), nodes_list, sfc_name, sf_list)
+    placement, schedule = get_placement_and_schedule(first_result, nodes_list, sfc_name, sf_list)
 
     # We run the simulator iterations number of times to get the Traffic info from the SimulatorAction object
     # We generate new source file for the BJointSP from the traffic info we get from the simulator for each iteration
@@ -106,8 +106,8 @@ def main():
         source, source_exists = create_source_file(apply_state.traffic, sf_list, sfc_name, flow_dr_mean)
         if source_exists:
             result = bjointsp_place(os.path.abspath(args.network), os.path.abspath(template), os.path.abspath(source),
-                                    cpu=node_cap, mem=node_cap, dr=1000, networkx=simulator.network)
-            placement, schedule = get_placement_and_schedule(os.path.abspath(result), nodes_list, sfc_name, sf_list)
+                                    cpu=node_cap, mem=node_cap, dr=1000, networkx=simulator.network, write_result=False)
+            placement, schedule = get_placement_and_schedule(result, nodes_list, sfc_name, sf_list)
 
 
 if __name__ == '__main__':

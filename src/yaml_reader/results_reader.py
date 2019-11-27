@@ -4,12 +4,12 @@ import yaml
 from common.common_functionalities import normalize_scheduling_probabilities
 
 
-def get_placement_and_schedule(results_file_loc, nodes_list, sfc_name, sf_list):
+def get_placement_and_schedule(results, nodes_list, sfc_name, sf_list):
     """
     Reads the results file created by the BJointSP to create the placement and schedule for the simulator
 
     Parameters:
-        results_file_loc: Results file from BJointSP
+        results: Results dict from BJointSP
         nodes_list
         sfc_name
         sf_list
@@ -40,8 +40,6 @@ def get_placement_and_schedule(results_file_loc, nodes_list, sfc_name, sf_list):
     placement = defaultdict(list)
 
     # creating the placement for the simulator from the results of BJointSP
-    with open(results_file_loc) as f:
-        results = yaml.load(f, yaml.Loader)
 
     for node in nodes_list:
         placement[node] = []

@@ -1,6 +1,4 @@
 from collections import defaultdict
-
-import yaml
 from common.common_functionalities import normalize_scheduling_probabilities
 
 

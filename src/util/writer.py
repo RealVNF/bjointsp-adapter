@@ -4,8 +4,7 @@ from shutil import copyfile
 from util.reader import get_project_root
 
 TEMPLATES_DIRECTORY = "res/templates"
-BJOINTSP_SOURCE_LOCATION = "res/sources/source.yaml"
-PREV_EMBEDDING_LOCATION = "res/prev_embedding/prev.yaml"
+BJOINTSP_SOURCE_LOCATION = "res/sources"
 
 
 def create_template(sfc_name, sf_list, sf_delays_dict):
@@ -20,9 +19,9 @@ def create_template(sfc_name, sf_list, sf_delays_dict):
     Returns:
         file_loc: relative path of the template file
     """
-    file_loc = f"{get_project_root()}/{TEMPLATES_DIRECTORY}/{sfc_name}.yaml"
+    template_file_loc = f"{get_project_root()}/{TEMPLATES_DIRECTORY}/{sfc_name}.yaml"
     os.makedirs(f"{get_project_root()}/{TEMPLATES_DIRECTORY}", exist_ok=True)
-    with open(file_loc, "w") as f:
+    with open(template_file_loc, "w") as f:
         template_dict = {}
         vnfs_list = []
         vlinks_list = []
@@ -97,7 +96,7 @@ def create_template(sfc_name, sf_list, sf_delays_dict):
             vlinks_list.append(vlink)
         template_dict['vlinks'] = vlinks_list
         yaml.dump(template_dict, f, default_flow_style=False)
-    return file_loc
+    return template_file_loc
 
 
 def create_source_file(traffic_info, sf_list, sfc_name, flow_dr_mean):
@@ -118,7 +117,9 @@ def create_source_file(traffic_info, sf_list, sfc_name, flow_dr_mean):
         JOINTSP_SOURCE_LOCATION: source file location
         source_exits: boolean indicating whether source file is empty or not
     """
-    with open(BJOINTSP_SOURCE_LOCATION, "w") as f:
+    source_file_loc = f"{get_project_root()}/{BJOINTSP_SOURCE_LOCATION}/source.yaml"
+    os.makedirs(f"{get_project_root()}/{BJOINTSP_SOURCE_LOCATION}", exist_ok=True)
+    with open(source_file_loc, "w") as f:
         i = 1
         source_list = []
         source_exists = False
@@ -133,7 +134,7 @@ def create_source_file(traffic_info, sf_list, sfc_name, flow_dr_mean):
                     i += 1
                 source_list.append({'node': node, 'vnf': "vnf_source", 'flows': flows})
         yaml.dump(source_list, f, default_flow_style=False)
-    return BJOINTSP_SOURCE_LOCATION, source_exists
+    return source_file_loc, source_exists
 
 
 def copy_input_files(target_dir, network_path, service_path, sim_config_path):

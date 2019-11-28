@@ -1,7 +1,9 @@
-import yaml, os
+import yaml
+import os
 from shutil import copyfile
+from util.reader import get_project_root
 
-TEMPLATES_DIRECTORY = "res/templates/"
+TEMPLATES_DIRECTORY = "res/templates"
 BJOINTSP_SOURCE_LOCATION = "res/sources/source.yaml"
 PREV_EMBEDDING_LOCATION = "res/prev_embedding/prev.yaml"
 
@@ -18,7 +20,8 @@ def create_template(sfc_name, sf_list, sf_delays_dict):
     Returns:
         file_loc: relative path of the template file
     """
-    file_loc = TEMPLATES_DIRECTORY + sfc_name + ".yaml"
+    file_loc = f"{get_project_root()}/{TEMPLATES_DIRECTORY}/{sfc_name}.yaml"
+    os.makedirs(f"{get_project_root()}/{TEMPLATES_DIRECTORY}", exist_ok=True)
     with open(file_loc, "w") as f:
         template_dict = {}
         vnfs_list = []

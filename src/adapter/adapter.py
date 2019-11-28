@@ -13,7 +13,7 @@ from util.writer import create_template, create_source_file, copy_input_files
 
 log = logging.getLogger(__name__)
 
-BJOINTSP_FIRST_SRC_LOCATION = "res/sources/first_source.yaml"
+FIRST_SRC_PATH = "res/sources"
 DATETIME = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
 
@@ -87,7 +87,9 @@ def main():
     # we can't create the source file needed for 'place' function of BJointSP,
     # So we for just the first 'place' call to BJointSP create a source file with just ingress nodes having *
     # *vnf_source as the vnf in it and date_rate of flow_dr_mean from the config file
-    with open(BJOINTSP_FIRST_SRC_LOCATION, "w") as f:
+    first_source_file_loc = f"{get_project_root()}/{FIRST_SRC_PATH}/first_source.yaml"
+    os.makedirs(f"{get_project_root()}/{FIRST_SRC_PATH}", exist_ok=True)
+    with open(first_source_file_loc, "w") as f:
         source_list = []
         for i in range(len(ingress_nodes)):
             source_list.append({'node': ingress_nodes[i], 'vnf': "vnf_source", 'flows': [{"id": "f" + str(i + 1),
@@ -98,7 +100,7 @@ def main():
     # Since the simulator right now does not have any link_dr , we are using a high value = 1000 for now.
     first_result = bjointsp_place(os.path.abspath(args.network),
                                   os.path.abspath(template),
-                                  os.path.abspath(BJOINTSP_FIRST_SRC_LOCATION), cpu=node_cap, mem=node_cap, dr=1000,
+                                  first_source_file_loc, cpu=node_cap, mem=node_cap, dr=1000,
                                   networkx=simulator.network, write_result=False)
     # creating the schedule and placement for the simulator from the first result file that BJointSP returns.
     placement, schedule = get_placement_and_schedule(first_result, nodes_list, sfc_name, sf_list)

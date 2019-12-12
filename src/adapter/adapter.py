@@ -7,6 +7,7 @@ from datetime import datetime
 from bjointsp.main import place as bjointsp_place
 from siminterface.simulator import Simulator
 from spinterface.spinterface import SimulatorAction
+from common.common_functionalities import create_input_file
 
 from util.reader import get_placement_and_schedule, get_project_root
 from util.writer import create_template, create_source_file, copy_input_files
@@ -121,6 +122,7 @@ def main():
 
     copy_input_files(results_dir, os.path.abspath(args.network), os.path.abspath(args.service_functions),
                      os.path.abspath(args.config))
+    create_input_file(results_dir, len(ingress_nodes), "BJointSP")
 
 
 if __name__ == '__main__':

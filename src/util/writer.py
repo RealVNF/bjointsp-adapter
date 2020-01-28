@@ -1,5 +1,6 @@
 import yaml
 import os
+import math
 from shutil import copyfile
 from util.reader import get_project_root
 
@@ -99,20 +100,33 @@ def create_template(sfc_name, sf_list, sf_delays_dict):
     return template_file_loc
 
 
-def create_source_file(traffic_info, sf_list, sfc_name, flow_dr_mean):
+def create_source_file(traffic_info, sf_list, sfc_name, ingress_nodes, flow_dr_mean,
+                       processing_delay, flow_duration, run_duration):
     """
         - creates the source file for the BJointSP based on the traffic info from the simulator
-        - for each node in the traffic_info, if the first SF has some aggregate dr , we divide it with the mean flow dr
-          to get the total number of flows on that node for the SF. Each such node becomes a source node with vnf_source
-          in it and total flows each of mean date rate.
+        - B-JointSP expects flows that are specified as input to run in parallel and be competing for resources
+        - So, we're trying to calculate the number of overlapping flows within a given run_duration that overlap
+        - A flow is competing for resources while it's being processed by a VNF
+        - Processing a flow takes flow_length + vnf_processing time steps. In our case, this is always 1 + 5 = 6
+        - If we have a run duration of 100, during which 50 flows arrive, then in total the 50 flows are
+          processed for 50x6 = 300 time steps. Since the run duration is only 100, in average 300/100 = 3 flows
+          are being processed in parallel, competing for resources.
+          Thus, we should specify 3 flows, each with the specified flow size (in our case 1), as input to B-Jointsp.
+        - In general, individually for each ingress, compute
+              avg_num_parallel_flows = (num_flows * flow_processing_length) / run_duration.
+          Then create avg_num_parallel_flows many flows, each with the specified flow size (in our case 1).
         - If traffic_info is empty , then the source file would be empty
         - A boolean variable source_exists tells whether the source file is empty or not
         - Incase of the empty source file, we use the previous schedule and placement for the simulator
     Parameters:
         traffic_info: from simulator
         sf_list
-        sfc_name:
-        flow_dr_mean:
+        sfc_name
+        flow_dr_mean
+        ingress_nodes
+        processing_delay
+        flow_duration
+        run_duration
     Returns:
         JOINTSP_SOURCE_LOCATION: source file location
         source_exits: boolean indicating whether source file is empty or not
@@ -123,13 +137,13 @@ def create_source_file(traffic_info, sf_list, sfc_name, flow_dr_mean):
         i = 1
         source_list = []
         source_exists = False
-        for node in traffic_info:
+        for node in ingress_nodes:
             flows = []
             first_vnf_dr = traffic_info[node][sfc_name][sf_list[0]]
             if first_vnf_dr:
                 source_exists = True
-                number_of_flows = int(first_vnf_dr / flow_dr_mean)
-                for _ in range(number_of_flows):
+                overlapping_flows = math.ceil((first_vnf_dr * (processing_delay + flow_duration)) / run_duration)
+                for _ in range(overlapping_flows):
                     flows.append({"id": "f" + str(i), "data_rate": flow_dr_mean})
                     i += 1
                 source_list.append({'node': node, 'vnf': "vnf_source", 'flows': flows})

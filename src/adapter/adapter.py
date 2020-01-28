@@ -3,6 +3,7 @@ import logging
 import os
 import yaml
 import random
+import math
 from datetime import datetime
 from bjointsp.main import place as bjointsp_place
 from siminterface.simulator import Simulator
@@ -50,7 +51,8 @@ def parse_args():
 
 def main():
     args = parse_args()
-    args.seed = random.randint(1, 9999)
+    if not args.seed:
+        args.seed = random.randint(1, 9999)
     os.makedirs("logs", exist_ok=True)
     logging.basicConfig(filename="logs/{}_{}_{}.log".format(os.path.basename(args.network),
                                                             DATETIME, args.seed), level=logging.INFO)
@@ -77,10 +79,20 @@ def main():
     sf_delays_dict = init_state.service_functions
     nodes_list = [node['id'] for node in init_state.network.get('nodes')]
     ingress_nodes, node_cap = get_ingress_nodes_and_cap(simulator.network)
-    # Getting the Mean Flow Data rate from the sim_config.yaml file
+    # Getting the Mean Flow Data rate and flow size from the simulator_config.yaml file
     with open(args.config, "r") as f:
         conf = yaml.load(f, yaml.SafeLoader)
         flow_dr_mean = conf.get('flow_dr_mean')
+        flow_size = conf.get('flow_size_shape')
+        run_duration = conf.get('run_duration')
+        inter_arrival_mean = conf.get('inter_arrival_mean')
+    flow_duration = (float(flow_size) / float(flow_dr_mean)) * 1000  # Converted flow duration to ms
+
+    # Getting Processing delay from Service_functions file
+    with open(args.service_functions, "r") as f:
+        service_func = yaml.load(f, yaml.SafeLoader)
+        processing_delay = service_func['sf_list'][sf_list[0]]['processing_delay_mean']
+
     # The template file is fixed, so it is created just once and used throughout for the 'place' fx of BJointSP
     template = create_template(sfc_name, sf_list, sf_delays_dict)
 
@@ -91,11 +103,16 @@ def main():
     first_source_file_loc = f"{get_project_root()}/{FIRST_SRC_PATH}/first_source.yaml"
     os.makedirs(f"{get_project_root()}/{FIRST_SRC_PATH}", exist_ok=True)
     with open(first_source_file_loc, "w") as f:
+        num_flows = run_duration / inter_arrival_mean
+        overlapping_flows = math.ceil((num_flows * (processing_delay + flow_duration))/run_duration)
         source_list = []
+        j = 1
         for i in range(len(ingress_nodes)):
-            source_list.append({'node': ingress_nodes[i], 'vnf': "vnf_source", 'flows': [{"id": "f" + str(i + 1),
-                                                                                          "data_rate": flow_dr_mean}
-                                                                                         ]})
+            flows = []
+            for _ in range(int(overlapping_flows / flow_dr_mean)):
+                flows.append({"id": "f" + str(j), "data_rate": flow_dr_mean})
+                j += 1
+            source_list.append({'node': ingress_nodes[i], 'vnf': "vnf_source", 'flows': flows})
         yaml.safe_dump(source_list, f, default_flow_style=False)
 
     # Since the simulator right now does not have any link_dr , we are using a high value = 1000 for now.
@@ -114,7 +131,8 @@ def main():
         action = SimulatorAction(placement, schedule)
         apply_state = simulator.apply(action)
         log.info("Network Stats after apply() # %s: %s", i + 1, apply_state.network_stats)
-        source, source_exists = create_source_file(apply_state.traffic, sf_list, sfc_name, flow_dr_mean)
+        source, source_exists = create_source_file(apply_state.traffic, sf_list, sfc_name, ingress_nodes, flow_dr_mean,
+                                                   processing_delay, flow_duration, run_duration)
         if source_exists:
             result = bjointsp_place(os.path.abspath(args.network), os.path.abspath(template), os.path.abspath(source),
                                     cpu=node_cap, mem=node_cap, dr=1000, networkx=simulator.network, write_result=False)

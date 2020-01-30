@@ -13,7 +13,12 @@ BjoinSP-adapter does the conversion in the following order:
       3. For each VNF, `vnf_delay` = `processing_delay_mean` from the `config` file
       4. VNFs only have a forward link
       5. The vnf_links has a very high `max_delay` = 1000
-    3. `source` : path to a first source file. Since we at the beginning don't have any traffic information  from the simulator we have to create this file statically. Each ingress node in the network is assumed to be a source having a single VNF `vnf_Source` and a single flow of `data_rate` =  `flow_dr_mean` taken from the `config` file
+    3. `source` : path to a first source file. Since we at the beginning don't have any traffic information  from the simulator we have to create this file statically. Each ingress node in the network is assumed to be a source having a single VNF `vnf_source` and the number of flows is calculated by calculating the number of `overlapping` flows as follows:
+            overlapping_flows = math.ceil((num_flows * (processing_delay + flow_duration))/run_duration)
+          - number of flows: is given by the simulator in the `traffic_info`
+          - processing_delay: taken from the service_function file
+          - flow_duration: (flow_size / flow_dr_mean) * 1000
+          - run_duration: taken from the config file
     4. `cpu` = `mem` = `node_capacity` from the network file
     5. dr=1000: Since the simulator in its current state does not have any link_dr , we are using a high value = 1000
 2. The results of the `place` call from step `1.` above are used to create the placement and schedule for the simulator as follows:
@@ -21,10 +26,17 @@ BjoinSP-adapter does the conversion in the following order:
     2. `schedule`: Since BJointSP does not return any schedule we have create it from the flows information returned by `place`. We assume that there is only a single SFC for simplicity. `flows` keeps track of the number of flows forwarded by BJointSP from a source_node to a dest_node. The schedule is created for each `source node`, for each `VNF` in the SFC, for each `destination node`. If a flow exits in `flows` from source node to destination node for a requested VNF we add it to the schedule. We use the probabilities normalization function `normalize_scheduling_probabilities` such that for each SF the sum of Probabilities is 1
 3. The `schedule` and `placement` from step `2.`  are used to call the `apply` function of the simulator.
 4. The result (traffic info.) of the `apply` call from step `3.` are used to create the `sources` for the next call to BjoinSP's `place` function. The sources are created as follows:
-    1.  For each node in the traffic_info, if the first SF (in our cases `a`) has some aggregate dr , we divide it with the `flow_dr_mean` to get the total number of flows (`number_of_flows`) on that node for the SF. Each such node becomes a source node with `vnf_source` in it and all of the `number_of_flows` each of `flow_dr_mean`.
-    2. If traffic_info is empty , then the source file would be empty
+    1.  For each ingress node, if the first SF (in our cases `a`) has some aggregate dr , we calculate the number of overlapping flows as follows:
+
+        `overlapping_flows = math.ceil((num_flows * (processing_delay + flow_duration))/run_duration)`
+
+     We then place `overlapping_flows` number of flows, each of `dr` = `flow_dr_mean` on that ingress node with a single VNF `vnf_source`
+    2. If traffic_info has no `dr` for `a` on any ingress node, then the source file would be empty
 5. If the `source` is created in step `4.`  we use it to call BJointSP's `place` and repeat step 2, 3, & 4.
 6. If the `source` is not created in step `4.`, the previously calculated `schedule` and `placement` is used to make the next call to the simulator's `apply`.
+
+#### Note: By calculating the overlapping_flows we can run the adapter with any `run_duration`. B-JointSP expects flows that are specified as sources to run in parallel and be competing for resources. A flow is competing for resources while it's being processed by a VNF. So by calculating the number of overlapping_flows we know how many parallel flows that BJointSP needs to cater to.
+
 
 ## Setup
 

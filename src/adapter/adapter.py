@@ -3,6 +3,7 @@ import logging
 import os
 import yaml
 import random
+from tqdm import tqdm
 from datetime import datetime
 from bjointsp.main import place as bjointsp_place
 from siminterface.simulator import Simulator
@@ -50,12 +51,13 @@ def parse_args():
 
 def main():
     args = parse_args()
-    args.seed = random.randint(1, 9999)
+    if not args.seed:
+        args.seed = random.randint(1, 9999)
     os.makedirs("logs", exist_ok=True)
     logging.basicConfig(filename="logs/{}_{}_{}.log".format(os.path.basename(args.network),
                                                             DATETIME, args.seed), level=logging.INFO)
     logging.getLogger("coordsim").setLevel(logging.WARNING)
-    logging.getLogger("bjointsp").setLevel(logging.INFO)
+    logging.getLogger("bjointsp").setLevel(logging.WARNING)
 
     # Creating the results directory variable where the simulator result files will be written
     network_stem = os.path.splitext(os.path.basename(args.network))[0]
@@ -70,7 +72,7 @@ def main():
                           os.path.abspath(args.service_functions),
                           os.path.abspath(args.config), test_mode=True, test_dir=results_dir)
     init_state = simulator.init(args.seed)
-    log.info("Network Stats after init(): %s", init_state.network_stats)
+    # log.info("Network Stats after init(): %s", init_state.network_stats)
     # assuming for now that there is only one SFC.
     sfc_name = list(init_state.sfcs.keys())[0]
     sf_list = list(init_state.sfcs.get(sfc_name))
@@ -110,10 +112,10 @@ def main():
     # We generate new source file for the BJointSP from the traffic info we get from the simulator for each iteration
     # Using this source file and the already generated Template file we call the 'place' fx of BJointSP
     # In-case no source exists, we use the previous placement and schedule
-    for i in range(args.iterations):
+    for _ in tqdm(range(args.iterations)):
         action = SimulatorAction(placement, schedule)
         apply_state = simulator.apply(action)
-        log.info("Network Stats after apply() # %s: %s", i + 1, apply_state.network_stats)
+        # log.info("Network Stats after apply() # %s: %s", i + 1, apply_state.network_stats)
         source, source_exists = create_source_file(apply_state.traffic, sf_list, sfc_name, flow_dr_mean)
         if source_exists:
             result = bjointsp_place(os.path.abspath(args.network), os.path.abspath(template), os.path.abspath(source),
@@ -123,6 +125,7 @@ def main():
     copy_input_files(results_dir, os.path.abspath(args.network), os.path.abspath(args.service_functions),
                      os.path.abspath(args.config))
     create_input_file(results_dir, len(ingress_nodes), "BJointSP")
+    log.info(f"Saved results in {results_dir}")
 
 
 if __name__ == '__main__':

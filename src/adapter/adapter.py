@@ -4,6 +4,7 @@ import os
 import yaml
 import random
 import math
+from tqdm import tqdm
 from datetime import datetime
 from bjointsp.main import place as bjointsp_place
 from siminterface.simulator import Simulator
@@ -127,10 +128,10 @@ def main():
     # We generate new source file for the BJointSP from the traffic info we get from the simulator for each iteration
     # Using this source file and the already generated Template file we call the 'place' fx of BJointSP
     # In-case no source exists, we use the previous placement and schedule
-    for i in range(args.iterations):
+    for _ in tqdm(range(args.iterations)):
         action = SimulatorAction(placement, schedule)
         apply_state = simulator.apply(action)
-        log.info("Network Stats after apply() # %s: %s", i + 1, apply_state.network_stats)
+        # log.info("Network Stats after apply() # %s: %s", i + 1, apply_state.network_stats)
         source, source_exists = create_source_file(apply_state.traffic, sf_list, sfc_name, ingress_nodes, flow_dr_mean,
                                                    processing_delay, flow_duration, run_duration)
         if source_exists:
@@ -141,6 +142,7 @@ def main():
     copy_input_files(results_dir, os.path.abspath(args.network), os.path.abspath(args.service_functions),
                      os.path.abspath(args.config))
     create_input_file(results_dir, len(ingress_nodes), "BJointSP")
+    log.info(f"Saved results in {results_dir}")
 
 
 if __name__ == '__main__':

@@ -1,5 +1,6 @@
-res/config/det-arrival10_det-size001_duration06.yaml
-res/config/det-arrival10_det-size001_duration06.yaml
-res/config/det-arrival10_det-size001_duration06.yaml
-res/config/det-arrival10_det-size001_duration06.yaml
-res/config/det-arrival10_det-size001_duration06.yaml
+res/config/det-arrival10_det-size001_duration100.yaml
+res/config/det-arrival10_det-size001_duration100.yaml
+res/config/det-arrival10_det-size001_duration100.yaml
+res/config/det-arrival10_det-size001_duration100.yaml
+res/config/det-arrival10_det-size001_duration100.yaml
+

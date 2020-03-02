@@ -127,8 +127,8 @@ def main():
         action = SimulatorAction(placement, schedule)
         apply_state = simulator.apply(action)
         # log.info("Network Stats after apply() # %s: %s", i + 1, apply_state.network_stats)
-        source, source_exists = create_source_object(apply_state.traffic, sf_list, sfc_name, ingress_nodes, flow_dr_mean,
-                                                     processing_delay, flow_duration, run_duration)
+        source, source_exists = create_source_object(apply_state.traffic, sf_list, sfc_name, ingress_nodes,
+                                                     flow_dr_mean, processing_delay, flow_duration, run_duration)
         if source_exists:
             result = bjointsp_place(os.path.abspath(args.network), template, source, source_template_object=True,
                                     cpu=node_cap, mem=node_cap, dr=1000, networkx=simulator.network, write_result=False)

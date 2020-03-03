@@ -7,12 +7,16 @@
 networks='scripts/network_files.txt'
 service_functions='scripts/service_files.txt'
 configs='scripts/config_files.txt'
+seeds='scripts/30seeds.txt'
 
 printf "\n\n-----------------------Running BJointSP------------------------------\n\n"
   
 paste $networks $service_functions $configs | while IFS="$(printf '\t')" read -r f1 f2 f3
 do
-  bjointsp-adapter -n $f1 -sf $f2 -c $f3 -i 200
+  paste $seeds | while IFS="$(printf '\t')" read -r f4
+  do
+    bjointsp-adapter -n $f1 -sf $f2 -c $f3 -i 1 -s $f4
+  done
 done
 
 printf "\n\n---------------------Finished running BJointSP-----------------------\n\n"

@@ -1,17 +1,18 @@
 import argparse
 import logging
-import os
-import yaml
-import random
 import math
+import os
+import random
 from datetime import datetime
+
+import yaml
 from bjointsp.main import place as bjointsp_place
+from common.common_functionalities import create_input_file
 from siminterface.simulator import Simulator
 from spinterface.spinterface import SimulatorAction
-from common.common_functionalities import create_input_file
-
+from tqdm import tqdm
 from util.reader import get_placement_and_schedule, get_project_root
-from util.writer import create_template, create_source_file, copy_input_files
+from util.writer import create_template, create_source_object, copy_input_files
 
 log = logging.getLogger(__name__)
 
@@ -93,33 +94,28 @@ def main():
         service_func = yaml.load(f, yaml.SafeLoader)
         processing_delay = service_func['sf_list'][sf_list[0]]['processing_delay_mean']
 
-    # The template file is fixed, so it is created just once and used throughout for the 'place' fx of BJointSP
+    # The template object is fixed, so it is created just once and used throughout for the 'place' fx of BJointSP
     template = create_template(sfc_name, sf_list, sf_delays_dict)
 
     # Since after the init() call to Simulator we don't get any traffic info back
-    # we can't create the source file needed for 'place' function of BJointSP,
-    # So we for just the first 'place' call to BJointSP create a source file with just ingress nodes having *
+    # we can't create the source needed for 'place' function of BJointSP,
+    # So we for just the first 'place' call to BJointSP create a source  with just ingress nodes having *
     # *vnf_source as the vnf in it and date_rate of flow_dr_mean from the config file
-    first_source_file_loc = f"{get_project_root()}/{FIRST_SRC_PATH}/first_source.yaml"
-    os.makedirs(f"{get_project_root()}/{FIRST_SRC_PATH}", exist_ok=True)
-    with open(first_source_file_loc, "w") as f:
-        num_flows = run_duration / inter_arrival_mean
-        overlapping_flows = math.ceil((num_flows * (processing_delay + flow_duration))/run_duration)
-        source_list = []
-        j = 1
-        for i in range(len(ingress_nodes)):
-            flows = []
-            for _ in range(int(overlapping_flows / flow_dr_mean)):
-                flows.append({"id": "f" + str(j), "data_rate": flow_dr_mean})
-                j += 1
-            source_list.append({'node': ingress_nodes[i], 'vnf': "vnf_source", 'flows': flows})
-        yaml.safe_dump(source_list, f, default_flow_style=False)
 
+    num_flows = run_duration / inter_arrival_mean
+    overlapping_flows = math.ceil((num_flows * (processing_delay + flow_duration)) / run_duration)
+    source_list = []
+    j = 1
+    for i in range(len(ingress_nodes)):
+        flows = []
+        for _ in range(int(overlapping_flows / flow_dr_mean)):
+            flows.append({"id": "f" + str(j), "data_rate": flow_dr_mean})
+            j += 1
+        source_list.append({'node': ingress_nodes[i], 'vnf': "vnf_source", 'flows': flows})
     # Since the simulator right now does not have any link_dr , we are using a high value = 1000 for now.
     first_result = bjointsp_place(os.path.abspath(args.network),
-                                  os.path.abspath(template),
-                                  first_source_file_loc, cpu=node_cap, mem=node_cap, dr=1000,
-                                  networkx=simulator.network, write_result=False)
+                                  template, source_list, source_template_object=True, cpu=node_cap, mem=node_cap,
+                                  dr=1000, networkx=simulator.network, write_result=False)
     # creating the schedule and placement for the simulator from the first result file that BJointSP returns.
     placement, schedule = get_placement_and_schedule(first_result, nodes_list, sfc_name, sf_list)
 
@@ -127,20 +123,21 @@ def main():
     # We generate new source file for the BJointSP from the traffic info we get from the simulator for each iteration
     # Using this source file and the already generated Template file we call the 'place' fx of BJointSP
     # In-case no source exists, we use the previous placement and schedule
-    for i in range(args.iterations):
+    for _ in tqdm(range(args.iterations)):
         action = SimulatorAction(placement, schedule)
         apply_state = simulator.apply(action)
-        log.info("Network Stats after apply() # %s: %s", i + 1, apply_state.network_stats)
-        source, source_exists = create_source_file(apply_state.traffic, sf_list, sfc_name, ingress_nodes, flow_dr_mean,
-                                                   processing_delay, flow_duration, run_duration)
+        # log.info("Network Stats after apply() # %s: %s", i + 1, apply_state.network_stats)
+        source, source_exists = create_source_object(apply_state.traffic, sf_list, sfc_name, ingress_nodes,
+                                                     flow_dr_mean, processing_delay, flow_duration, run_duration)
         if source_exists:
-            result = bjointsp_place(os.path.abspath(args.network), os.path.abspath(template), os.path.abspath(source),
+            result = bjointsp_place(os.path.abspath(args.network), template, source, source_template_object=True,
                                     cpu=node_cap, mem=node_cap, dr=1000, networkx=simulator.network, write_result=False)
             placement, schedule = get_placement_and_schedule(result, nodes_list, sfc_name, sf_list)
 
     copy_input_files(results_dir, os.path.abspath(args.network), os.path.abspath(args.service_functions),
                      os.path.abspath(args.config))
-    create_input_file(results_dir, len(ingress_nodes), "BJointSP")
+    create_input_file(results_dir, len(ingress_nodes), "BJointSP-Fixed")
+    log.info(f"Saved results in {results_dir}")
 
 
 if __name__ == '__main__':

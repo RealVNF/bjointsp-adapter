@@ -1,11 +1,6 @@
-import yaml
-import os
 import math
+import os
 from shutil import copyfile
-from util.reader import get_project_root
-
-TEMPLATES_DIRECTORY = "res/templates"
-BJOINTSP_SOURCE_LOCATION = "res/sources"
 
 
 def create_template(sfc_name, sf_list, sf_delays_dict):
@@ -18,92 +13,90 @@ def create_template(sfc_name, sf_list, sf_delays_dict):
         sf_list
         sf_delays_dict
     Returns:
-        file_loc: relative path of the template file
+        Template object
     """
-    template_file_loc = f"{get_project_root()}/{TEMPLATES_DIRECTORY}/{sfc_name}.yaml"
-    os.makedirs(f"{get_project_root()}/{TEMPLATES_DIRECTORY}", exist_ok=True)
-    with open(template_file_loc, "w") as f:
-        template_dict = {}
-        vnfs_list = []
-        vlinks_list = []
-        template_dict['name'] = sfc_name
-        vnf_source = {
-            "name": "vnf_source",
-            "type": "source",
-            "stateful": True,
-            "inputs_fwd": 0,
-            "inputs_bwd": 0,
-            "outputs_fwd": 1,
-            "outputs_bwd": 0,
-            "cpu": [0],
-            "mem": [0],
-            "vnf_delay": 0,
-            "out_fwd": [],
-            "out_bwd": []
-        }
-        vnfs_list.append(vnf_source)
-        for i in range(len(sf_list) - 1):
-            vnf = {
-                "name": sf_list[i],
-                "type": "normal",
-                "stateful": False,
-                "inputs_fwd": 1,
-                "inputs_bwd": 0,
-                "outputs_fwd": 1,
-                "outputs_bwd": 0,
-                "cpu": [1, 0],
-                "mem": [0, 0],
-                "vnf_delay": sf_delays_dict[sf_list[i]]['processing_delay_mean'],
-                "out_fwd": [[1, 0]],
-                "out_bwd": []
-            }
-            vnfs_list.append(vnf)
-        vnf_last = {
-            "name": sf_list[-1],
+
+    template_dict = {}
+    vnfs_list = []
+    vlinks_list = []
+    template_dict['name'] = sfc_name
+    vnf_source = {
+        "name": "vnf_source",
+        "type": "source",
+        "stateful": True,
+        "inputs_fwd": 0,
+        "inputs_bwd": 0,
+        "outputs_fwd": 1,
+        "outputs_bwd": 0,
+        "cpu": [0],
+        "mem": [0],
+        "vnf_delay": 0,
+        "out_fwd": [],
+        "out_bwd": []
+    }
+    vnfs_list.append(vnf_source)
+    for i in range(len(sf_list) - 1):
+        vnf = {
+            "name": sf_list[i],
             "type": "normal",
             "stateful": False,
             "inputs_fwd": 1,
             "inputs_bwd": 0,
-            "outputs_fwd": 0,
+            "outputs_fwd": 1,
             "outputs_bwd": 0,
             "cpu": [1, 0],
             "mem": [0, 0],
-            "vnf_delay": sf_delays_dict[sf_list[-1]]['processing_delay_mean'],
-            "out_fwd": [],
+            "vnf_delay": sf_delays_dict[sf_list[i]]['processing_delay_mean'],
+            "out_fwd": [[1, 0]],
             "out_bwd": []
         }
-        vnfs_list.append(vnf_last)
-        template_dict['vnfs'] = vnfs_list
+        vnfs_list.append(vnf)
+    vnf_last = {
+        "name": sf_list[-1],
+        "type": "normal",
+        "stateful": False,
+        "inputs_fwd": 1,
+        "inputs_bwd": 0,
+        "outputs_fwd": 0,
+        "outputs_bwd": 0,
+        "cpu": [1, 0],
+        "mem": [0, 0],
+        "vnf_delay": sf_delays_dict[sf_list[-1]]['processing_delay_mean'],
+        "out_fwd": [],
+        "out_bwd": []
+    }
+    vnfs_list.append(vnf_last)
+    template_dict['vnfs'] = vnfs_list
 
-        vlink_source = {
+    vlink_source = {
+        "direction": "forward",
+        "src": "vnf_source",
+        "src_output": 0,
+        "dest": sf_list[0],
+        "dest_input": 0,
+        "max_delay": 1000
+    }
+    vlinks_list.append(vlink_source)
+
+    for i in range(len(sf_list) - 1):
+        vlink = {
             "direction": "forward",
-            "src": "vnf_source",
+            "src": sf_list[i],
             "src_output": 0,
-            "dest": sf_list[0],
+            "dest": sf_list[i + 1],
             "dest_input": 0,
             "max_delay": 1000
         }
-        vlinks_list.append(vlink_source)
+        vlinks_list.append(vlink)
+    template_dict['vlinks'] = vlinks_list
 
-        for i in range(len(sf_list) - 1):
-            vlink = {
-                "direction": "forward",
-                "src": sf_list[i],
-                "src_output": 0,
-                "dest": sf_list[i + 1],
-                "dest_input": 0,
-                "max_delay": 1000
-            }
-            vlinks_list.append(vlink)
-        template_dict['vlinks'] = vlinks_list
-        yaml.dump(template_dict, f, default_flow_style=False)
-    return template_file_loc
+    return template_dict
 
 
-def create_source_file(traffic_info, sf_list, sfc_name, ingress_nodes, flow_dr_mean,
-                       processing_delay, flow_duration, run_duration):
+def create_source_object(traffic_info, sf_list, sfc_name, ingress_nodes, flow_dr_mean,
+                         processing_delay, flow_duration, run_duration):
     """
-        - creates the source file for the BJointSP based on the traffic info from the simulator
+        - creates the source object for the BJointSP based on the traffic info from the simulator
         - B-JointSP expects flows that are specified as input to run in parallel and be competing for resources
         - So, we're trying to calculate the number of overlapping flows within a given run_duration that overlap
         - A flow is competing for resources while it's being processed by a VNF
@@ -115,9 +108,9 @@ def create_source_file(traffic_info, sf_list, sfc_name, ingress_nodes, flow_dr_m
         - In general, individually for each ingress, compute
               avg_num_parallel_flows = (num_flows * flow_processing_length) / run_duration.
           Then create avg_num_parallel_flows many flows, each with the specified flow size (in our case 1).
-        - If traffic_info is empty , then the source file would be empty
-        - A boolean variable source_exists tells whether the source file is empty or not
-        - Incase of the empty source file, we use the previous schedule and placement for the simulator
+        - If traffic_info is empty , then the source would be empty
+        - A boolean variable source_exists tells whether the source is empty or not
+        - Incase of the empty source , we use the previous schedule and placement for the simulator
     Parameters:
         traffic_info: from simulator
         sf_list
@@ -128,27 +121,24 @@ def create_source_file(traffic_info, sf_list, sfc_name, ingress_nodes, flow_dr_m
         flow_duration
         run_duration
     Returns:
-        JOINTSP_SOURCE_LOCATION: source file location
+        source_list: list of sources
         source_exits: boolean indicating whether source file is empty or not
     """
-    source_file_loc = f"{get_project_root()}/{BJOINTSP_SOURCE_LOCATION}/source.yaml"
-    os.makedirs(f"{get_project_root()}/{BJOINTSP_SOURCE_LOCATION}", exist_ok=True)
-    with open(source_file_loc, "w") as f:
-        i = 1
-        source_list = []
-        source_exists = False
-        for node in ingress_nodes:
-            flows = []
-            first_vnf_dr = traffic_info[node][sfc_name][sf_list[0]]
-            if first_vnf_dr:
-                source_exists = True
-                overlapping_flows = math.ceil((first_vnf_dr * (processing_delay + flow_duration)) / run_duration)
-                for _ in range(overlapping_flows):
-                    flows.append({"id": "f" + str(i), "data_rate": flow_dr_mean})
-                    i += 1
-                source_list.append({'node': node, 'vnf': "vnf_source", 'flows': flows})
-        yaml.dump(source_list, f, default_flow_style=False)
-    return source_file_loc, source_exists
+
+    i = 1
+    source_list = []
+    source_exists = False
+    for node in ingress_nodes:
+        flows = []
+        first_vnf_dr = traffic_info[node][sfc_name][sf_list[0]]
+        if first_vnf_dr:
+            source_exists = True
+            overlapping_flows = math.ceil((first_vnf_dr * (processing_delay + flow_duration)) / run_duration)
+            for _ in range(overlapping_flows):
+                flows.append({"id": "f" + str(i), "data_rate": flow_dr_mean})
+                i += 1
+            source_list.append({'node': node, 'vnf': "vnf_source", 'flows': flows})
+    return source_list, source_exists
 
 
 def copy_input_files(target_dir, network_path, service_path, sim_config_path):

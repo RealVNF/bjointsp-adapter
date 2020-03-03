@@ -9,7 +9,8 @@ requirements = [
     'pyyaml>=5.1',
     'coord-interface',
     'bjointsp',
-    'coord-sim'
+    'coord-sim',
+    'tqdm'
 ]
 
 test_requirements = [

@@ -15,7 +15,7 @@ paste $networks $service_functions $configs | while IFS="$(printf '\t')" read -r
 do
   paste $seeds | while IFS="$(printf '\t')" read -r f4
   do
-    bjointsp-adapter -n $f1 -sf $f2 -c $f3 -i 1 -s $f4
+    bjointsp-adapter -n $f1 -sf $f2 -c $f3 -i 200 -s $f4
   done
 done
 

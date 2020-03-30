@@ -3,6 +3,28 @@ Adapter to map the inputs and outputs of the B-JointSP to the simulator interfac
 
 B-JointSP should work with the [flow-level simulator](https://github.com/RealVNF/coordination-simulation), ie, be aligned to the [interface](https://github.com/RealVNF/coordination-simulation/blob/master/src/siminterface/interface/siminterface.py). This requires mapping the simulator state into something B-JointSP understands and mapping B-JointSP's outputs/placement into something the simulator understands.
 
+<p align="center">
+    <img src="https://raw.githubusercontent.com/RealVNF/deep-rl-service-coordination/master/docs/realvnf_logo.png?token=AIDTJSQ4PTVX6A4D6HSPDDC6RNE54" height="150" hspace="30"/>
+	<img src="https://raw.githubusercontent.com/RealVNF/deep-rl-service-coordination/master/docs/upb.png?token=AIDTJSXSEB2M2BEFGFU4N3S6RNFGA" width="200" hspace="30"/>
+	<img src="https://raw.githubusercontent.com/RealVNF/deep-rl-service-coordination/master/docs/huawei_horizontal.png?token=AIDTJSSKOEGP7GI6K5YIWUC6RNFH2" width="250" hspace="30"/>
+</p>
+
+
+## Citing this work
+
+If you are using this work in whole or in part in your project, please cite it as follows:
+
+```
+@inproceedings{schneider2020coordination,
+	author = {Schneider, Stefan and Khalili, Ramin and Manzoor, Adnan and Qarawlus, Haydar and Uthe, Sven and Karl, Holger and Hecker, Artur},
+	booktitle = {ACM SIGCOMM NetAI Workshop 2020 (SIGCOMM NetAI ’20)},
+	pages = {1--8},
+	title = {Self-Driving Coordination of Massively Scaled Services Using Deep Reinforcement Learning},
+	year = {2020},
+	note = {under review}
+}
+```
+
 ## Working Details
 BjoinSP-adapter does the conversion in the following order:
 1. Calls BjoinSP's `place` function with the following parameters:
@@ -87,3 +109,12 @@ bjointsp-adapter -n "res/networks/triangle.graphml" \
 ```
 
 This will run the bjointsp-adapter and call the `apply()` of the sim-interface and the `place()` of BJointSP 50 times.
+
+## Acknowledgement
+
+This project has received funding from German Federal Ministry of Education and Research ([BMBF](https://www.bmbf.de/)) through Software Campus grant 01IS17046 ([RealVNF](https://realvnf.github.io/)).
+
+<p align="center">
+	<img src="https://raw.githubusercontent.com/RealVNF/deep-rl-service-coordination/master/docs/software_campus.png?token=AIDTJSQS7WZNSZHFL23FNYS6RNFJK" width="200"/>
+	<img src="https://raw.githubusercontent.com/RealVNF/deep-rl-service-coordination/master/docs/BMBF_sponsored_by.jpg?token=AIDTJSRMQYSKOC7K3EWIQ5S6RNFKW" width="250"/>
+</p>

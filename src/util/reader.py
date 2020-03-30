@@ -1,6 +1,5 @@
 from collections import defaultdict
 from common.common_functionalities import normalize_scheduling_probabilities
-from pathlib import Path
 
 
 def get_placement_and_schedule(results, nodes_list, sfc_name, sf_list):
@@ -84,6 +83,4 @@ def get_placement_and_schedule(results, nodes_list, sfc_name, sf_list):
     return placement, schedule
 
 
-def get_project_root():
-    """Returns project's root folder."""
-    return str(Path(__file__).parent.parent.parent)
+

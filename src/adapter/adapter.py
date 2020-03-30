@@ -3,20 +3,21 @@ import logging
 import os
 import random
 from datetime import datetime
-
+from pathlib import Path
 import yaml
 from bjointsp.main import place as bjointsp_place
 from common.common_functionalities import create_input_file
 from siminterface.simulator import Simulator
 from spinterface.spinterface import SimulatorAction
 from tqdm import tqdm
-from util.reader import get_placement_and_schedule, get_project_root
+from util.reader import get_placement_and_schedule
 from util.writer import create_template, create_source_object, copy_input_files
 
 log = logging.getLogger(__name__)
 
 FIRST_SRC_PATH = "res/sources"
 DATETIME = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+PROJECT_ROOT = str(Path(__file__).parent.parent.parent)
 
 
 def get_ingress_nodes_and_cap(network):
@@ -64,7 +65,7 @@ def main():
     service_function_stem = os.path.splitext(os.path.basename(args.service_functions))[0]
     simulator_config_stem = os.path.splitext(os.path.basename(args.config))[0]
 
-    results_dir = f"{get_project_root()}/results/{network_stem}/{service_function_stem}/{simulator_config_stem}" \
+    results_dir = f"{PROJECT_ROOT}/results/{network_stem}/{service_function_stem}/{simulator_config_stem}" \
                   f"/{DATETIME}_seed{args.seed}"
     # creating the simulator
     # initializing the simulator with absolute paths to the network, service_functions and the config. files.
@@ -110,7 +111,6 @@ def main():
     for _ in tqdm(range(args.iterations)):
         action = SimulatorAction(placement, schedule)
         apply_state = simulator.apply(action)
-        # log.info("Network Stats after apply() # %s: %s", i + 1, apply_state.network_stats)
         source, source_exists = create_source_object(apply_state.traffic, sf_list, sfc_name, flow_dr_mean)
         if source_exists:
             result = bjointsp_place(os.path.abspath(args.network), template, source, source_template_object=True,

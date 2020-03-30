@@ -1,4 +1,5 @@
 from collections import defaultdict
+
 from common.common_functionalities import normalize_scheduling_probabilities
 
 
@@ -81,6 +82,3 @@ def get_placement_and_schedule(results, nodes_list, sfc_name, sf_list):
             for i in range(len(nodes_list)):
                 schedule[src_node][sfc_name][sf][nodes_list[i]] = rounded_prob_list[i]
     return placement, schedule
-
-
-

@@ -25,7 +25,10 @@ If you are using this work in whole or in part in your project, please cite it a
 }
 ```
 
+*Note: For the source code originally implemented and submitted to ACM SIGCOMM NetAI 2020, refer to the corresponding [release](https://github.com/RealVNF/bjointsp-adapter/releases/tag/v1.0) or [branch](https://github.com/RealVNF/bjointsp-adapter/tree/netai2020). The master branch will be continuously improved and extended.*
+
 ## Working Details
+
 BjoinSP-adapter does the conversion in the following order:
 1. Calls BjoinSP's `place` function with the following parameters:
     1. `network file`: path to the file
@@ -53,6 +56,7 @@ BjoinSP-adapter does the conversion in the following order:
         `overlapping_flows = math.ceil((num_flows * (processing_delay + flow_duration))/run_duration)`
 
      We then place `overlapping_flows` number of flows, each of `dr` = `flow_dr_mean` on that ingress node with a single VNF `vnf_source`
+    
     2. If traffic_info has no `dr` for `a` on any ingress node, then the source file would be empty
 5. If the `source` is created in step `4.`  we use it to call BJointSP's `place` and repeat step 2, 3, & 4.
 6. If the `source` is not created in step `4.`, the previously calculated `schedule` and `placement` is used to make the next call to the simulator's `apply`.

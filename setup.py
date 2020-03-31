@@ -19,11 +19,10 @@ test_requirements = [
 
 setup(
     name='bjointsp-adapter',
-    version='0.0.2',
+    version='1.0.0',
     description='Works as an adapter between BJointSP as the coordination algo and coord-simulator.',
     url='https://github.com/RealVNF/bjointsp-adapter',
     author='Stefan Schneider',
-    author_email='stefan.schneider@upb.de',
     package_dir={'': 'src'},
     packages=find_packages('src'),
     install_requires=requirements + test_requirements,

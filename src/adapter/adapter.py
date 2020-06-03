@@ -131,7 +131,8 @@ def main():
                                                      flow_dr_mean, processing_delay, flow_duration, run_duration)
         if source_exists:
             result = bjointsp_place(os.path.abspath(args.network), template, source, source_template_object=True,
-                                    cpu=node_cap, mem=node_cap, dr=1000, networkx=simulator.network, write_result=False)
+                                    cpu=node_cap, mem=node_cap, dr=1000, networkx=simulator.network, write_result=False,
+                                    logging_level=None)
             placement, schedule = get_placement_and_schedule(result, nodes_list, sfc_name, sf_list)
 
     copy_input_files(results_dir, os.path.abspath(args.network), os.path.abspath(args.service_functions),

@@ -100,7 +100,8 @@ def main():
 
     # Since the simulator right now does not have any link_dr , we are using a high value = 1000 for now.
     first_result = bjointsp_place(os.path.abspath(args.network), template, source_list, source_template_object=True,
-                                  cpu=node_cap, mem=node_cap, dr=1000, networkx=simulator.network, write_result=False)
+                                  cpu=node_cap, mem=node_cap, dr=1000, networkx=simulator.network, write_result=False,
+                                  logging_level=None)
     # creating the schedule and placement for the simulator from the first result file that BJointSP returns.
     placement, schedule = get_placement_and_schedule(first_result, nodes_list, sfc_name, sf_list)
 
@@ -114,7 +115,8 @@ def main():
         source, source_exists = create_source_object(apply_state.traffic, sf_list, sfc_name, flow_dr_mean)
         if source_exists:
             result = bjointsp_place(os.path.abspath(args.network), template, source, source_template_object=True,
-                                    cpu=node_cap, mem=node_cap, dr=1000, networkx=simulator.network, write_result=False)
+                                    cpu=node_cap, mem=node_cap, dr=1000, networkx=simulator.network, write_result=False,
+                                    logging_level=None)
             placement, schedule = get_placement_and_schedule(result, nodes_list, sfc_name, sf_list)
 
     copy_input_files(results_dir, os.path.abspath(args.network), os.path.abspath(args.service_functions),

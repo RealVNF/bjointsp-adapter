@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/RealVNF/bjointsp-adapter.svg?branch=BSP-Ad-cnsm2020)](https://travis-ci.com/RealVNF/bjointsp-adapter)
+
 # bjointsp-adapter advanced
 
 Adapter to map the inputs and outputs of the B-JointSP to the simulator interface

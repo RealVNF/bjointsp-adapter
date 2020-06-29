@@ -55,11 +55,11 @@ def main():
     args = parse_args()
     if not args.seed:
         args.seed = random.randint(1, 9999)
-    os.makedirs("logs", exist_ok=True)
-    logging.basicConfig(filename="logs/{}_{}_{}.log".format(os.path.basename(args.network),
-                                                            DATETIME, args.seed), level=logging.INFO)
-    logging.getLogger("coordsim").setLevel(logging.WARNING)
-    logging.getLogger("bjointsp").setLevel(logging.INFO)
+    # os.makedirs("logs", exist_ok=True)
+    # logging.basicConfig(filename="logs/{}_{}_{}.log".format(os.path.basename(args.network),
+    #                                                        DATETIME, args.seed), level=logging.INFO)
+    # logging.getLogger("coordsim").setLevel(logging.WARNING)
+    # logging.getLogger("bjointsp").setLevel(logging.INFO)
 
     # Creating the results directory variable where the simulator result files will be written
     network_stem = os.path.splitext(os.path.basename(args.network))[0]
@@ -74,7 +74,7 @@ def main():
                           os.path.abspath(args.service_functions),
                           os.path.abspath(args.config), test_mode=True, test_dir=results_dir)
     init_state = simulator.init(args.seed)
-    log.info("Network Stats after init(): %s", init_state.network_stats)
+    # log.info("Network Stats after init(): %s", init_state.network_stats)
     # assuming for now that there is only one SFC.
     sfc_name = list(init_state.sfcs.keys())[0]
     sf_list = list(init_state.sfcs.get(sfc_name))
@@ -138,7 +138,7 @@ def main():
     copy_input_files(results_dir, os.path.abspath(args.network), os.path.abspath(args.service_functions),
                      os.path.abspath(args.config))
     create_input_file(results_dir, len(ingress_nodes), "BJointSP-Fixed")
-    log.info(f"Saved results in {results_dir}")
+    print(f"Saved results in {results_dir}")
 
 
 if __name__ == '__main__':

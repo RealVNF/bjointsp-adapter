@@ -2,9 +2,6 @@ import os
 
 from setuptools import setup, find_packages
 
-os.system('pip install git+https://github.com/RealVNF/common-utils')
-os.system('pip install git+https://github.com/RealVNF/coord-sim.git')
-os.system('pip install git+https://github.com/CN-UPB/B-JointSP.git')
 requirements = [
     'pyyaml>=5.1',
     'common-utils',
@@ -22,7 +19,6 @@ setup(
     version='1.0.0',
     description='Works as an adapter between BJointSP as the coordination algo and coord-simulator.',
     url='https://github.com/RealVNF/bjointsp-adapter',
-    author='Stefan Schneider',
     package_dir={'': 'src'},
     packages=find_packages('src'),
     install_requires=requirements + test_requirements,

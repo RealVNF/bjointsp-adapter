@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/RealVNF/bjointsp-adapter.svg?branch=call-per-flow)](https://travis-ci.com/RealVNF/bjointsp-adapter)
+
 # BJointSP-adapter Default
 
 Adapter to map the inputs and outputs of the B-JointSP to the simulator interface
@@ -39,7 +41,7 @@ BjoinSP-adapter does the conversion in the following order:
 
 Install [Python 3.6](https://www.python.org/downloads/release/) and [venv](https://docs.python.org/3/library/venv.html) modules.
 
-_Recommended for development_: Clone and install `coord-sim` and `common-utils` locally first in the same venv before running the installation of the adapter in the `editable` mode: `pip install -e bjointsp-adapter`
+_Recommended for development_: Clone and install [coord-sim](https://github.com/RealVNF/coord-sim) and [common-utils](https://github.com/RealVNF/common-utils) locally first in the same venv before running the installation of the adapter in the `editable` mode: `pip install -e bjointsp-adapter`
 
 ```bash
 # clone this repo and enter dir
@@ -58,6 +60,7 @@ source venv/bin/activate
 # install package
 pip install -r requirements.txt
 ```
+This also installs the required [coord-sim](https://github.com/RealVNF/coord-sim) simulator and [common-utils](https://github.com/RealVNF/common-utils) package.
 
 ## Usage
 

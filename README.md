@@ -1,13 +1,13 @@
-# bjointsp-adapter
+# BJointSP-adapter Advanced
 
 Adapter to map the inputs and outputs of the B-JointSP to the simulator interface
 
 B-JointSP should work with the [flow-level simulator](https://github.com/RealVNF/coordination-simulation), ie, be aligned to the [interface](https://github.com/RealVNF/coordination-simulation/blob/master/src/siminterface/interface/siminterface.py). This requires mapping the simulator state into something B-JointSP understands and mapping B-JointSP's outputs/placement into something the simulator understands.
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/RealVNF/coord-sim/master/docs/realvnf_logo.png" height="150" hspace="30"/>
-	<img src="https://raw.githubusercontent.com/RealVNF/coord-sim/master/docs/upb.png" width="200" hspace="30"/>
-	<img src="https://raw.githubusercontent.com/RealVNF/coord-sim/master/docs/huawei_horizontal.png" width="250" hspace="30"/>
+  <img src="docs/realvnf_logo.png" height="150" hspace="30"/>
+	<img src="docs/upb.png" width="200" hspace="30"/>
+	<img src="docs/huawei_horizontal.png" width="250" hspace="30"/>
 </p>
 
 ## Working Details
@@ -53,6 +53,8 @@ BjoinSP-adapter does the conversion in the following order:
 
 Install [Python 3.6](https://www.python.org/downloads/release/) and [venv](https://docs.python.org/3/library/venv.html) modules.
 
+_Recommended for development_: Clone and install `coord-sim` and `common-utils` locally first in the same venv before running the installation of the adapter in the `editable` mode: `pip install -e bjointsp-adapter`
+
 ```bash
 # clone this repo and enter dir
 git clone git@github.com:RealVNF/bjointsp-adapter.git
@@ -68,10 +70,8 @@ python3 -m venv venv
 source venv/bin/activate
 
 # install package
-pip install .
+pip install -r requirements.txt
 ```
-
-##
 
 ## Usage
 
@@ -101,11 +101,28 @@ bjointsp-adapter -n "res/networks/triangle.graphml" \
 
 This will run the bjointsp-adapter and call the `apply()` of the sim-interface and the `place()` of BJointSP 50 times.
 
+### Using the parallel script to run multiple experiments:
+
+There is script provided in the `scripts` folder that utilizes the [GNU Parallel](https://www.gnu.org/software/parallel/) utility to run multiple experiments at the same time to speed up the process. It can run one algorithm at a time, so you need to choose the algo you wanna run at the beginning of the file.
+
+From [scripts directory](scripts) configure the following files:
+
+- [network_files](scripts/network_files.txt): 1 network file location per line
+- [config_files](scripts/config_files.txt): 1 simulator config. file location per line
+- [service_files](scripts/service_files.txt): 1 SFC file location per line
+- [30seeds](scripts/30seeds.txt): 1 seed per run of the simulator. By default using 30 seeds. Add/Remove as per requirement
+
+From the main directory (where the README.md file is) using a Terminal run:
+
+```bash
+bash scripts/run_parallel
+```
+
 ## Acknowledgement
 
 This project has received funding from German Federal Ministry of Education and Research ([BMBF](https://www.bmbf.de/)) through Software Campus grant 01IS17046 ([RealVNF](https://realvnf.github.io/)).
 
 <p align="center">
-	<img src="https://raw.githubusercontent.com/RealVNF/coord-sim/master/docs/software_campus.png" width="200"/>
-	<img src="https://raw.githubusercontent.com/RealVNF/coord-sim/master/docs/BMBF_sponsored_by.jpg" width="250"/>
+	<img src="docs/software_campus.png" width="200"/>
+	<img src="docs/BMBF_sponsored_by.jpg" width="250"/>
 </p>

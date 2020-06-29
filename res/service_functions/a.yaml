@@ -3,10 +3,10 @@
 # list of SFCs and involved SFs (order of SFs matters)
 sfc_list:
   sfc_1:
-    - A
+    - a
 
 # SF attributes (for now, processing delay)
 sf_list:
-  A:
-    processing_delay_mean: 5.0
+  a:
+    processing_delay_mean: 0.0
     processing_delay_stdev: 0.0

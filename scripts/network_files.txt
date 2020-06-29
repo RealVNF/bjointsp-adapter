@@ -1,3 +1,1 @@
-res/networks/bteurope/bteurope-in8-rand-cap0-2.graphml
-res/networks/chinanet/chinanet-in14-rand-cap0-2.graphml
-res/networks/tinet/tinet-in17-rand-cap0-2.graphml
+res/networks/abilene/abilene-in4-rand-cap0-2.graphml

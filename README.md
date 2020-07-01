@@ -41,7 +41,7 @@ BjoinSP-adapter does the conversion in the following order:
 
 Install [Python 3.6](https://www.python.org/downloads/release/) and [venv](https://docs.python.org/3/library/venv.html) modules.
 
-_Recommended for development_: Clone and install [coord-sim](https://github.com/RealVNF/coord-sim) and [common-utils](https://github.com/RealVNF/common-utils) locally first in the same venv before running the installation of the adapter in the `editable` mode: `pip install -e bjointsp-adapter`
+_Recommended for development_: Clone and install [coord-sim](https://github.com/RealVNF/coord-sim), [common-utils](https://github.com/RealVNF/common-utils), and [BJointSP](https://github.com/CN-UPB/B-JointSP) locally first in the same venv before running the installation of the adapter in the `editable` mode: `pip install -e bjointsp-adapter`
 
 ```bash
 # clone this repo and enter dir
@@ -60,7 +60,7 @@ source venv/bin/activate
 # install package
 pip install -r requirements.txt
 ```
-This also installs the required [coord-sim](https://github.com/RealVNF/coord-sim) simulator and [common-utils](https://github.com/RealVNF/common-utils) package.
+This also installs the required [coord-sim](https://github.com/RealVNF/coord-sim) simulator, [common-utils](https://github.com/RealVNF/common-utils), and [BJointSP](https://github.com/CN-UPB/B-JointSP) package.
 
 ## Usage
 

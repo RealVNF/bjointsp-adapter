@@ -31,7 +31,7 @@ BjoinSP-adapter does the conversion in the following order:
       - flow_duration: (flow_size / flow_dr_mean) \* 1000
       - run_duration: taken from the config file
    9. `cpu` = `mem` = `node_capacity` from the network file
-   10. dr=1000: Since the simulator in its current state does not have any link_dr , we are using a high value = 1000
+   10. It gets the NetworkX object from the simulator, including the node and link capacities.
 2. The results of the `place` call from step `1.` above are used to create the placement and schedule for the simulator as follows:
    1. `placement`: The placements are simply obtained from the result of `place` call.
    2. `schedule`: Since BJointSP does not return any schedule we have create it from the flows information returned by `place`. We assume that there is only a single SFC for simplicity. `flows` keeps track of the number of flows forwarded by BJointSP from a source_node to a dest_node. The schedule is created for each `source node`, for each `VNF` in the SFC, for each `destination node`. If a flow exits in `flows` from source node to destination node for a requested VNF we add it to the schedule. We use the probabilities normalization function `normalize_scheduling_probabilities` such that for each SF the sum of Probabilities is 1
